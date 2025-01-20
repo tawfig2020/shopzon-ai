@@ -1,0 +1,11 @@
+# Core Web Framework
+flask==2.3.2
+flask-cors==4.0.0
+flask-sqlalchemy==3.0.3
+
+# Database
+sqlalchemy==2.0.19
+redis==5.0.1
+
+# Security and Validation
+python-dotenv==1.0.0

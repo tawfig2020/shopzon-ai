@@ -1,0 +1,20 @@
+runtime: nodejs18
+env: standard
+
+env_variables:
+  NODE_ENV: "production"
+
+entrypoint: node test-server.js
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+network:
+  session_affinity: true

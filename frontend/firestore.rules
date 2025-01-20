@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isSharedWithUser(data) {
+      return request.auth.token.email in (data.shared || []);
+    }
+    
+    // Shopping Lists
+    match /shoppingLists/{listId} {
+      allow read: if isSignedIn() && (isOwner(resource.data.userId) || isSharedWithUser(resource.data));
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update: if isSignedIn() && (isOwner(resource.data.userId) || isSharedWithUser(resource.data));
+      allow delete: if isSignedIn() && isOwner(resource.data.userId);
+      
+      // Items in a shopping list
+      match /items/{itemId} {
+        allow read: if isSignedIn() && (isOwner(get(/databases/$(database)/documents/shoppingLists/$(listId)).data.userId) || 
+                                      isSharedWithUser(get(/databases/$(database)/documents/shoppingLists/$(listId)).data));
+        allow write: if isSignedIn() && (isOwner(get(/databases/$(database)/documents/shoppingLists/$(listId)).data.userId) || 
+                                       isSharedWithUser(get(/databases/$(database)/documents/shoppingLists/$(listId)).data));
+      }
+    }
+    
+    // User items for suggestions
+    match /items/{itemId} {
+      allow read: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update: if isSignedIn() && isOwner(resource.data.userId);
+      allow delete: if isSignedIn() && isOwner(resource.data.userId);
+    }
+  }
+}

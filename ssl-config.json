@@ -1,0 +1,30 @@
+{
+  "ssl": {
+    "enabled": true,
+    "redirect": true,
+    "hsts": {
+      "enabled": true,
+      "maxAge": 31536000,
+      "includeSubDomains": true,
+      "preload": true
+    },
+    "certs": {
+      "auto": true,
+      "email": "admin@shopsync.ai"
+    }
+  },
+  "security": {
+    "headers": {
+      "contentSecurityPolicy": {
+        "defaultSrc": ["'self'"],
+        "scriptSrc": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        "styleSrc": ["'self'", "'unsafe-inline'"],
+        "imgSrc": ["'self'", "data:", "https:"],
+        "connectSrc": ["'self'", "https://api.shopsync.ai"]
+      },
+      "xFrameOptions": "DENY",
+      "xContentTypeOptions": "nosniff",
+      "referrerPolicy": "strict-origin-when-cross-origin"
+    }
+  }
+}

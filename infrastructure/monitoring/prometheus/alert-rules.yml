@@ -1,0 +1,116 @@
+groups:
+  - name: ShopSyncAI
+    rules:
+      # System Health Rules
+      - alert: HighCPUUsage
+        expr: avg(rate(container_cpu_usage_seconds_total[5m])) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage detected
+          description: CPU usage is above 80% for 5 minutes
+
+      - alert: HighMemoryUsage
+        expr: avg(container_memory_usage_bytes / container_memory_max_usage_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: Memory usage is above 85% for 5 minutes
+
+      # Application Performance Rules
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High response time detected
+          description: 95th percentile of response time is above 2 seconds
+
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate is above 5% for 5 minutes
+
+      # AI Agent Performance Rules
+      - alert: LowAIAgentAccuracy
+        expr: avg(ai_agent_accuracy) < 0.8
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low AI agent accuracy detected
+          description: AI agent accuracy is below 80% for 15 minutes
+
+      - alert: HighAIAgentLatency
+        expr: avg(ai_agent_processing_time_seconds) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High AI agent latency detected
+          description: AI agent processing time is above 5 seconds
+
+      # Database Performance Rules
+      - alert: HighDatabaseLatency
+        expr: avg(rate(database_query_duration_seconds_sum[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High database latency detected
+          description: Average database query time is above 1 second
+
+      - alert: HighDatabaseConnections
+        expr: avg(database_connections) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High number of database connections
+          description: Database connections are above 80% of maximum
+
+      # Customer Experience Rules
+      - alert: LowCustomerSatisfaction
+        expr: avg(customer_satisfaction_score) < 3.5
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low customer satisfaction detected
+          description: Average customer satisfaction score is below 3.5/5
+
+      - alert: HighChatResponseTime
+        expr: avg(chat_response_time_seconds) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High chat response time detected
+          description: Average chat response time is above 30 seconds
+
+      # Infrastructure Rules
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Instance is down
+          description: Instance has been down for more than 5 minutes
+
+      - alert: HighDiskUsage
+        expr: disk_used_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High disk usage detected
+          description: Disk usage is above 85%

@@ -1,0 +1,54 @@
+name: ShopSync AI CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r backend/requirements.txt
+    - name: Run backend tests
+      run: |
+        cd backend
+        pytest tests/
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test
+
+  deploy:
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to Google Cloud
+      uses: google-github-actions/deploy-cloudrun@v1
+      with:
+        service: shopsync-ai
+        image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/shopsync-ai
+        credentials: ${{ secrets.GCP_SA_KEY }}
