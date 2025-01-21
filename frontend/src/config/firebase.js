@@ -1,20 +1,21 @@
-import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCZo-HCtTqI7U8sHu9RYOPgPeHgCGuUjSM',
-  authDomain: 'shopsyncai-19aba.firebaseapp.com',
-  projectId: 'shopsyncai-19aba',
-  storageBucket: 'shopsyncai-19aba.firebasestorage.app',
-  messagingSenderId: '617167398621',
-  appId: '1:617167398621:web:d21c2a4da4525318969d34',
-  measurementId: 'G-X5FD4VCMEJ',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-console.log('Initializing Firebase with config:', {
+// Validate required config
+const requiredConfig = {
   apiKey: !!firebaseConfig.apiKey,
   authDomain: !!firebaseConfig.authDomain,
   projectId: !!firebaseConfig.projectId,
@@ -22,28 +23,21 @@ console.log('Initializing Firebase with config:', {
   messagingSenderId: !!firebaseConfig.messagingSenderId,
   appId: !!firebaseConfig.appId,
   measurementId: !!firebaseConfig.measurementId,
-});
+};
+
+const missingConfig = Object.entries(requiredConfig)
+  .filter(([_, exists]) => !exists)
+  .map(([key]) => key);
+
+if (missingConfig.length > 0) {
+  throw new Error(`Missing required Firebase configuration: ${missingConfig.join(', ')}`);
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase services
 const auth = getAuth(app);
-let analytics = null;
-// Only initialize analytics if we're in a browser environment
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-}
 const db = getFirestore(app);
 const storage = getStorage(app);
-const googleProvider = new GoogleAuthProvider();
+const analytics = getAnalytics(app);
 
-// Configure Google Provider
-googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
-googleProvider.addScope('https://www.googleapis.com/auth/userinfo.email');
-googleProvider.setCustomParameters({
-  prompt: 'select_account',
-});
-
-// Export Firebase services
-export { auth, analytics, db, storage, googleProvider };
+export { app, auth, db, storage, analytics };

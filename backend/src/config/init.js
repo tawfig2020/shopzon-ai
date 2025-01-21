@@ -24,14 +24,18 @@ let redisClient = null;
 let firestore = null;
 
 async function initMongoDB() {
-  const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://tawfig2030shopi:ASMARA2020klshopi@shopi.ejaom.mongodb.net/?retryWrites=true&w=majority&appName=Shopi';
-  
   try {
-    await mongoose.connect(mongoUri, {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+
+    const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
-    });
+    };
+
+    await mongoose.connect(process.env.MONGODB_URI, options);
     
     logger.info('MongoDB connected successfully');
     
